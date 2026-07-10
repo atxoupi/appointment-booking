@@ -67,3 +67,29 @@ export async function listAppointmentsForUser(
   }
   return db.appointment.findMany({ where: { clientId: userId }, orderBy: { date: "asc" } });
 }
+
+export type CancelAppointmentResult =
+  | { ok: true }
+  | { ok: false; reason: "NOT_FOUND" | "FORBIDDEN" };
+
+export async function cancelAppointment(
+  params: { appointmentId: string; actingUserId: string; actingUserRole: Role },
+  db: PrismaClient = defaultPrisma
+): Promise<CancelAppointmentResult> {
+  const appointment = await db.appointment.findUnique({ where: { id: params.appointmentId } });
+  if (!appointment) return { ok: false, reason: "NOT_FOUND" };
+
+  const isOwningClient = params.actingUserRole === "CLIENT" && appointment.clientId === params.actingUserId;
+  const isOwningWorker = params.actingUserRole === "WORKER" && appointment.workerId === params.actingUserId;
+  const isAdmin = params.actingUserRole === "ADMIN";
+
+  if (!isOwningClient && !isOwningWorker && !isAdmin) {
+    return { ok: false, reason: "FORBIDDEN" };
+  }
+
+  await db.appointment.update({
+    where: { id: params.appointmentId },
+    data: { status: "CANCELLED" },
+  });
+  return { ok: true };
+}
