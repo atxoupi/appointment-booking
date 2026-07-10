@@ -1,21 +1,8 @@
 // src/app/api/cron/reminders/route.ts
 import { NextResponse } from "next/server";
-import type { Appointment, PrismaClient } from "@prisma/client";
 import { prisma as defaultPrisma } from "@/lib/prisma";
 import { sendAppointmentReminder } from "@/lib/email";
-
-export async function findAppointmentsNeedingReminder(
-  now: Date,
-  db: PrismaClient = defaultPrisma
-): Promise<Appointment[]> {
-  const tomorrow = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
-  );
-
-  return db.appointment.findMany({
-    where: { status: "CONFIRMED", date: tomorrow },
-  });
-}
+import { findAppointmentsNeedingReminder } from "@/lib/reminders-service";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");

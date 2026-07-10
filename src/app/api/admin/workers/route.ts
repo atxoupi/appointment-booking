@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import type { User } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { createWorker, listWorkers } from "@/lib/workers-service";
-
-export function toSafeWorker(worker: User) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructured only to omit it from the response
-  const { passwordHash, ...safeWorker } = worker;
-  return safeWorker;
-}
+import { toSafeWorker } from "@/lib/worker-serialization";
 
 export async function GET() {
   const session = await getServerSession(authOptions);

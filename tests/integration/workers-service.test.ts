@@ -2,7 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { testDb, resetDatabase } from "./setup";
 import { createWorker, listWorkers } from "@/lib/workers-service";
 import { verifyPassword } from "@/lib/password";
-import { toSafeWorker } from "@/app/api/admin/workers/route";
+import { toSafeWorker } from "@/lib/worker-serialization";
 
 describe("workers-service", () => {
   beforeEach(resetDatabase);

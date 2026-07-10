@@ -1,7 +1,7 @@
 // tests/integration/reminders.test.ts
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { testDb, resetDatabase } from "./setup";
-import { findAppointmentsNeedingReminder } from "@/app/api/cron/reminders/route";
+import { findAppointmentsNeedingReminder } from "@/lib/reminders-service";
 
 describe("findAppointmentsNeedingReminder", () => {
   beforeEach(resetDatabase);
