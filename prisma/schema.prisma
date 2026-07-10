@@ -1,0 +1,101 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  WORKER
+  ADMIN
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum CreatedBy {
+  CLIENT
+  STAFF
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  role         Role
+  name         String
+  lastName     String
+  phone        String?
+  createdAt    DateTime @default(now())
+
+  appointmentsAsClient Appointment[]           @relation("ClientAppointments")
+  appointmentsAsWorker Appointment[]           @relation("WorkerAppointments")
+  weekAssignments      WorkerWeekAssignment[]
+}
+
+model Service {
+  id              String   @id @default(cuid())
+  name            String
+  durationMinutes Int
+  active          Boolean  @default(true)
+
+  appointments Appointment[]
+}
+
+model ShiftTemplate {
+  id         String  @id @default(cuid())
+  name       String
+  isVacation Boolean @default(false)
+
+  ranges      ShiftTemplateRange[]
+  assignments WorkerWeekAssignment[]
+}
+
+model ShiftTemplateRange {
+  id              String @id @default(cuid())
+  shiftTemplateId String
+  dayOfWeek       Int
+  startTime       String
+  endTime         String
+
+  shiftTemplate ShiftTemplate @relation(fields: [shiftTemplateId], references: [id], onDelete: Cascade)
+
+  @@index([shiftTemplateId, dayOfWeek])
+}
+
+model WorkerWeekAssignment {
+  id              String   @id @default(cuid())
+  workerId        String
+  weekStartDate   DateTime
+  shiftTemplateId String
+
+  worker        User          @relation(fields: [workerId], references: [id])
+  shiftTemplate ShiftTemplate @relation(fields: [shiftTemplateId], references: [id])
+
+  @@unique([workerId, weekStartDate])
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  clientId  String
+  workerId  String
+  serviceId String
+  date      DateTime
+  startTime String
+  endTime   String
+  status    AppointmentStatus @default(CONFIRMED)
+  createdBy CreatedBy
+  createdAt DateTime          @default(now())
+
+  client  User    @relation("ClientAppointments", fields: [clientId], references: [id])
+  worker  User    @relation("WorkerAppointments", fields: [workerId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@index([workerId, date])
+}
