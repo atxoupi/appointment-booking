@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { cancelAppointment } from "@/lib/appointments-service";
+import { sendAppointmentCancellation } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -24,5 +26,19 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (!result.ok) {
     return NextResponse.json({ error: "No tienes permiso para cancelar esta cita" }, { status: 403 });
   }
+
+  const appointment = await prisma.appointment.findUniqueOrThrow({ where: { id: params.id } });
+  const [client, worker, service] = await Promise.all([
+    prisma.user.findUniqueOrThrow({ where: { id: appointment.clientId } }),
+    prisma.user.findUniqueOrThrow({ where: { id: appointment.workerId } }),
+    prisma.service.findUniqueOrThrow({ where: { id: appointment.serviceId } }),
+  ]);
+  await sendAppointmentCancellation(client.email, {
+    serviceName: service.name,
+    workerName: `${worker.name} ${worker.lastName}`,
+    date: appointment.date.toISOString().slice(0, 10),
+    startTime: appointment.startTime,
+  });
+
   return NextResponse.json({ ok: true });
 }

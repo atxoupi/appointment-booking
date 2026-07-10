@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createAppointment, listAppointmentsForUser } from "@/lib/appointments-service";
+import { sendAppointmentConfirmation } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -38,5 +40,18 @@ export async function POST(request: Request) {
   if (!result.ok) {
     return NextResponse.json({ error: "El horario ya no está disponible" }, { status: 409 });
   }
+
+  const [client, worker, service] = await Promise.all([
+    prisma.user.findUniqueOrThrow({ where: { id: result.appointment.clientId } }),
+    prisma.user.findUniqueOrThrow({ where: { id: result.appointment.workerId } }),
+    prisma.service.findUniqueOrThrow({ where: { id: result.appointment.serviceId } }),
+  ]);
+  await sendAppointmentConfirmation(client.email, {
+    serviceName: service.name,
+    workerName: `${worker.name} ${worker.lastName}`,
+    date: result.appointment.date.toISOString().slice(0, 10),
+    startTime: result.appointment.startTime,
+  });
+
   return NextResponse.json(result.appointment, { status: 201 });
 }
