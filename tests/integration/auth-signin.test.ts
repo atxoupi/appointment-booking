@@ -84,7 +84,11 @@ describe("authOptions.callbacks.signIn", () => {
     const result = await authOptions.callbacks!.signIn!(params);
 
     expect(result).toBe(true);
-    const rows = await testDb.user.findMany();
+    // Scope to this test's own email rather than the whole table: with
+    // fileParallelism disabled this file no longer races other integration
+    // test files, but a whole-table assertion would still be needlessly
+    // coupled to what else this describe block does.
+    const rows = await testDb.user.findMany({ where: { email: "cliente@example.com" } });
     expect(rows).toHaveLength(0);
   });
 });
