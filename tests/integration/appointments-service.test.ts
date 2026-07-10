@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { testDb, resetDatabase } from "./setup";
-import { createAppointment } from "@/lib/appointments-service";
+import { createAppointment, cancelAppointment } from "@/lib/appointments-service";
 
 async function seedBasicFixture() {
   const worker = await testDb.user.create({
@@ -118,8 +118,6 @@ describe("createAppointment", () => {
   });
 });
 
-import { cancelAppointment } from "@/lib/appointments-service";
-
 describe("cancelAppointment", () => {
   beforeEach(resetDatabase);
 
@@ -154,6 +152,43 @@ describe("cancelAppointment", () => {
 
     const result = await cancelAppointment(
       { appointmentId: created.appointment.id, actingUserId: otherClient.id, actingUserRole: "CLIENT" },
+      testDb
+    );
+
+    expect(result).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
+  it("lets the assigned worker cancel their own appointment", async () => {
+    const { worker, client, service, tuesday } = await seedBasicFixture();
+    const created = await createAppointment(
+      { clientId: client.id, workerId: worker.id, serviceId: service.id, date: tuesday, startTime: "08:00", createdBy: "CLIENT" },
+      testDb
+    );
+    if (!created.ok) throw new Error("setup failed");
+
+    const result = await cancelAppointment(
+      { appointmentId: created.appointment.id, actingUserId: worker.id, actingUserRole: "WORKER" },
+      testDb
+    );
+
+    expect(result).toEqual({ ok: true });
+    const updated = await testDb.appointment.findUniqueOrThrow({ where: { id: created.appointment.id } });
+    expect(updated.status).toBe("CANCELLED");
+  });
+
+  it("forbids a different worker (not assigned to the appointment) from cancelling it", async () => {
+    const { worker, client, service, tuesday } = await seedBasicFixture();
+    const otherWorker = await testDb.user.create({
+      data: { email: "other-worker@example.com", role: "WORKER", name: "Otro", lastName: "Trabajador" },
+    });
+    const created = await createAppointment(
+      { clientId: client.id, workerId: worker.id, serviceId: service.id, date: tuesday, startTime: "08:00", createdBy: "CLIENT" },
+      testDb
+    );
+    if (!created.ok) throw new Error("setup failed");
+
+    const result = await cancelAppointment(
+      { appointmentId: created.appointment.id, actingUserId: otherWorker.id, actingUserRole: "WORKER" },
       testDb
     );
 
