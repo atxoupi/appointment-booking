@@ -33,12 +33,16 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     prisma.user.findUniqueOrThrow({ where: { id: appointment.workerId } }),
     prisma.service.findUniqueOrThrow({ where: { id: appointment.serviceId } }),
   ]);
-  await sendAppointmentCancellation(client.email, {
-    serviceName: service.name,
-    workerName: `${worker.name} ${worker.lastName}`,
-    date: appointment.date.toISOString().slice(0, 10),
-    startTime: appointment.startTime,
-  });
+  try {
+    await sendAppointmentCancellation(client.email, {
+      serviceName: service.name,
+      workerName: `${worker.name} ${worker.lastName}`,
+      date: appointment.date.toISOString().slice(0, 10),
+      startTime: appointment.startTime,
+    });
+  } catch (err) {
+    console.error("Failed to send cancellation email:", err);
+  }
 
   return NextResponse.json({ ok: true });
 }

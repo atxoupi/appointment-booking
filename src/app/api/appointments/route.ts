@@ -46,12 +46,16 @@ export async function POST(request: Request) {
     prisma.user.findUniqueOrThrow({ where: { id: result.appointment.workerId } }),
     prisma.service.findUniqueOrThrow({ where: { id: result.appointment.serviceId } }),
   ]);
-  await sendAppointmentConfirmation(client.email, {
-    serviceName: service.name,
-    workerName: `${worker.name} ${worker.lastName}`,
-    date: result.appointment.date.toISOString().slice(0, 10),
-    startTime: result.appointment.startTime,
-  });
+  try {
+    await sendAppointmentConfirmation(client.email, {
+      serviceName: service.name,
+      workerName: `${worker.name} ${worker.lastName}`,
+      date: result.appointment.date.toISOString().slice(0, 10),
+      startTime: result.appointment.startTime,
+    });
+  } catch (err) {
+    console.error("Failed to send confirmation email:", err);
+  }
 
   return NextResponse.json(result.appointment, { status: 201 });
 }

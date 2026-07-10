@@ -1,7 +1,15 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM ?? "citas@example.com";
+
+let resendClient: Resend | undefined;
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
 
 export interface AppointmentEmailDetails {
   serviceName: string;
@@ -11,7 +19,7 @@ export interface AppointmentEmailDetails {
 }
 
 export async function sendAppointmentConfirmation(to: string, details: AppointmentEmailDetails) {
-  return resend.emails.send({
+  return getResendClient().emails.send({
     from: FROM,
     to,
     subject: "Confirmación de tu cita",
@@ -20,7 +28,7 @@ export async function sendAppointmentConfirmation(to: string, details: Appointme
 }
 
 export async function sendAppointmentCancellation(to: string, details: AppointmentEmailDetails) {
-  return resend.emails.send({
+  return getResendClient().emails.send({
     from: FROM,
     to,
     subject: "Cancelación de tu cita",
@@ -29,7 +37,7 @@ export async function sendAppointmentCancellation(to: string, details: Appointme
 }
 
 export async function sendAppointmentReminder(to: string, details: AppointmentEmailDetails) {
-  return resend.emails.send({
+  return getResendClient().emails.send({
     from: FROM,
     to,
     subject: "Recordatorio de tu cita mañana",

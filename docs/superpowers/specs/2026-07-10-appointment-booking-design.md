@@ -116,13 +116,22 @@ base de datos, y se aplica la restricción única `(workerId, date, startTime)` 
 citas `CONFIRMED`, de forma que dos reservas simultáneas al mismo hueco no puedan
 coexistir.
 
+**Limitación conocida:** la garantía anti-condición-de-carrera (índice único parcial)
+solo previene dos reservas con el mismo `workerId`, `date` y `startTime` exactos. Dos
+reservas concurrentes de distinta duración que se solapan parcialmente (ej. una de
+60 min a las 09:00 y otra de 30 min a las 09:30 con el mismo trabajador) no están
+mutuamente excluidas a nivel de base de datos bajo alta concurrencia. Se acepta este
+riesgo dado el bajo volumen de reservas simultáneas esperado para un negocio pequeño;
+si el volumen crece, considerar aislamiento `Serializable` en la transacción de
+reserva.
+
 ## Roles y permisos
 
 | Acción | Cliente | Trabajador | Admin |
 |---|---|---|---|
 | Reservar cita propia | Sí | — | — |
 | Ver/cancelar sus propias citas | Sí | — | — |
-| Crear/cancelar/reprogramar citas de sus clientes | — | Sí | Sí (todas) |
+| Crear/cancelar citas de sus clientes | — | Sí | Sí (todas) |
 | Ver su propia agenda | — | Sí | Sí (todas) |
 | CRUD de servicios | — | — | Sí |
 | CRUD de turnos (`ShiftTemplate` + franjas) | — | — | Sí |
@@ -162,3 +171,4 @@ mediante un script de seed.
 - Restricción de servicios por habilidades de cada trabajador (hoy: todos los
   trabajadores pueden realizar todos los servicios).
 - El trabajador editando su propio turno (hoy: solo el admin lo asigna).
+- Reprogramar citas existentes (hoy: se cancela y se crea una nueva).
