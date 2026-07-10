@@ -128,9 +128,15 @@ coexistir.
 | CRUD de turnos (`ShiftTemplate` + franjas) | — | — | Sí |
 | Asignar turnos semanales a trabajadores | — | — | Sí |
 | Ver listado de clientes | — | — | Sí |
+| Crear cuentas de trabajador | — | — | Sí |
 
 El trabajador solo puede **consultar** su propio turno; únicamente el admin puede
 asignarlo o modificarlo.
+
+Los clientes se autoregistran (email/contraseña o Google). Las cuentas de
+trabajador y admin no tienen autoregistro: el admin las crea desde su panel
+(nombre, email, teléfono, contraseña inicial); la primera cuenta admin se crea
+mediante un script de seed.
 
 ## Notificaciones
 
