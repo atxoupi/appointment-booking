@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { prisma as defaultPrisma } from "@/lib/prisma";
 import {
   getMondayOfWeek,
@@ -16,7 +16,7 @@ export interface WorkerAvailability {
 
 export async function getAvailableSlots(
   params: { serviceId: string; date: Date; workerId?: string },
-  db: PrismaClient = defaultPrisma
+  db: PrismaClient | Prisma.TransactionClient = defaultPrisma
 ): Promise<WorkerAvailability[]> {
   const service = await db.service.findUniqueOrThrow({ where: { id: params.serviceId } });
   const weekStartDate = getMondayOfWeek(params.date);
