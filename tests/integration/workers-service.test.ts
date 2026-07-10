@@ -2,6 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { testDb, resetDatabase } from "./setup";
 import { createWorker, listWorkers } from "@/lib/workers-service";
 import { verifyPassword } from "@/lib/password";
+import { toSafeWorker } from "@/app/api/admin/workers/route";
 
 describe("workers-service", () => {
   beforeEach(resetDatabase);
@@ -31,5 +32,21 @@ describe("workers-service", () => {
     await expect(
       createWorker({ email: "dup@example.com", password: "otra-clave", name: "C", lastName: "D" }, testDb)
     ).rejects.toThrow();
+  });
+
+  it("never exposes passwordHash in the API-serialized worker (GET/POST response shape)", async () => {
+    const worker = await createWorker(
+      { email: "safe@example.com", password: "clave-segura-1", name: "E", lastName: "F" },
+      testDb
+    );
+
+    const safeWorker = toSafeWorker(worker);
+    expect(safeWorker).not.toHaveProperty("passwordHash");
+    expect(JSON.stringify(safeWorker)).not.toContain("passwordHash");
+
+    const workers = await listWorkers(testDb);
+    for (const w of workers.map(toSafeWorker)) {
+      expect(w).not.toHaveProperty("passwordHash");
+    }
   });
 });
