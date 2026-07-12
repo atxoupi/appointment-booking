@@ -99,3 +99,16 @@ model Appointment {
 
   @@index([workerId, date])
 }
+
+model SiteSettings {
+  id              String   @id
+  businessName    String   @default("Mi Negocio")
+  tagline         String   @default("")
+  backgroundColor String   @default("#ffffff")
+  menuColor       String   @default("#171717")
+  logoImage       Bytes?
+  logoMimeType    String?
+  heroImage       Bytes?
+  heroMimeType    String?
+  updatedAt       DateTime @updatedAt
+}

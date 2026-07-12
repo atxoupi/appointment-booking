@@ -12,4 +12,5 @@ export async function resetDatabase() {
   await testDb.shiftTemplate.deleteMany();
   await testDb.service.deleteMany();
   await testDb.user.deleteMany();
+  await testDb.siteSettings.deleteMany();
 }
