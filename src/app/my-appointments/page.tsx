@@ -33,16 +33,28 @@ export default function MyAppointmentsPage() {
   }
 
   return (
-    <main>
-      <h1>Mis citas</h1>
-      <ul>
+    <main className="mx-auto max-w-2xl px-4 py-8">
+      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Mis citas</h1>
+      <div className="flex flex-col gap-3">
         {appointments.map((a) => (
-          <li key={a.id}>
-            {a.date.slice(0, 10)} {a.startTime}-{a.endTime} — {a.status}
-            {a.status === "CONFIRMED" && <button onClick={() => cancel(a.id)}>Cancelar</button>}
-          </li>
+          <div
+            key={a.id}
+            className="flex items-center justify-between rounded-md border border-slate-200 p-3 text-sm"
+          >
+            <span>
+              {a.date.slice(0, 10)} {a.startTime}-{a.endTime} — {a.status}
+            </span>
+            {a.status === "CONFIRMED" && (
+              <button
+                onClick={() => cancel(a.id)}
+                className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
         ))}
-      </ul>
+      </div>
     </main>
   );
 }
