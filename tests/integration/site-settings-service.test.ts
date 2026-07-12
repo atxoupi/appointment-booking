@@ -52,4 +52,15 @@ describe("site-settings-service", () => {
     expect(updated.businessName).toBe("Peluquería Ana");
     expect(updated.tagline).toBe("Nueva frase");
   });
+
+  it("leaves a previously uploaded image untouched when updating only text fields", async () => {
+    const fakeImage = Buffer.from([137, 80, 78, 71]);
+    await updateSiteSettings({ logoImage: fakeImage, logoMimeType: "image/png" }, testDb);
+
+    const updated = await updateSiteSettings({ businessName: "Nuevo Nombre" }, testDb);
+
+    expect(updated.businessName).toBe("Nuevo Nombre");
+    expect(updated.logoImage).toEqual(fakeImage);
+    expect(updated.logoMimeType).toBe("image/png");
+  });
 });
