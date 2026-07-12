@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSiteSettings } from "@/lib/site-settings-service";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const settings = await getSiteSettings();
   if (!settings.heroImage || !settings.heroMimeType) {
@@ -9,7 +11,7 @@ export async function GET() {
   return new NextResponse(new Uint8Array(settings.heroImage), {
     headers: {
       "Content-Type": settings.heroMimeType,
-      "Cache-Control": "public, max-age=300",
+      "Cache-Control": "no-cache",
     },
   });
 }
