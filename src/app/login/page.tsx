@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -18,7 +18,15 @@ export default function LoginPage() {
       setError("Email o contraseña incorrectos");
       return;
     }
-    router.push("/");
+    const session = await getSession();
+    if (session?.user.role === "ADMIN") {
+      router.push("/admin/appointments");
+    } else if (session?.user.role === "WORKER") {
+      router.push("/worker");
+    } else {
+      router.push("/");
+    }
+    router.refresh();
   }
 
   return (
