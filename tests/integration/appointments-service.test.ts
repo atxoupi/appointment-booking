@@ -329,4 +329,66 @@ describe("getDailyView", () => {
 
     expect(result.map((w) => w.name)).toEqual(["Ana Ruiz", "Zoe López"]);
   });
+
+  it("isolates appointments per worker — worker A appointments do not appear under worker B", async () => {
+    const workerA = await testDb.user.create({
+      data: { email: "wa@example.com", role: "WORKER", name: "Ana", lastName: "Ruiz" },
+    });
+    const workerB = await testDb.user.create({
+      data: { email: "wb@example.com", role: "WORKER", name: "Bruno", lastName: "López" },
+    });
+    const client = await testDb.user.create({
+      data: { email: "c@example.com", role: "CLIENT", name: "Pedro", lastName: "García" },
+    });
+    const service = await testDb.service.create({
+      data: { name: "Corte", durationMinutes: 30 },
+    });
+    const date = new Date("2026-07-17T00:00:00.000Z");
+    await testDb.appointment.create({
+      data: {
+        workerId: workerA.id, clientId: client.id, serviceId: service.id,
+        date, startTime: "10:00", endTime: "10:30", status: "CONFIRMED", createdBy: "CLIENT",
+      },
+    });
+    await testDb.appointment.create({
+      data: {
+        workerId: workerB.id, clientId: client.id, serviceId: service.id,
+        date, startTime: "11:00", endTime: "11:30", status: "CONFIRMED", createdBy: "CLIENT",
+      },
+    });
+
+    const result = await getDailyView(date, testDb);
+
+    const ana = result.find((w) => w.name === "Ana Ruiz")!;
+    const bruno = result.find((w) => w.name === "Bruno López")!;
+    expect(ana.appointments).toHaveLength(1);
+    expect(ana.appointments[0].startTime).toBe("10:00");
+    expect(bruno.appointments).toHaveLength(1);
+    expect(bruno.appointments[0].startTime).toBe("11:00");
+  });
+
+  it("excludes appointments on a different date", async () => {
+    const worker = await testDb.user.create({
+      data: { email: "w@example.com", role: "WORKER", name: "Ana", lastName: "Ruiz" },
+    });
+    const client = await testDb.user.create({
+      data: { email: "c@example.com", role: "CLIENT", name: "Pedro", lastName: "García" },
+    });
+    const service = await testDb.service.create({
+      data: { name: "Corte", durationMinutes: 30 },
+    });
+    const targetDate = new Date("2026-07-17T00:00:00.000Z");
+    const otherDate = new Date("2026-07-18T00:00:00.000Z");
+    await testDb.appointment.create({
+      data: {
+        workerId: worker.id, clientId: client.id, serviceId: service.id,
+        date: otherDate, startTime: "10:00", endTime: "10:30",
+        status: "CONFIRMED", createdBy: "CLIENT",
+      },
+    });
+
+    const result = await getDailyView(targetDate, testDb);
+
+    expect(result[0].appointments).toHaveLength(0);
+  });
 });

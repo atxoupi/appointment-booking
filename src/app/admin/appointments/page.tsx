@@ -34,12 +34,16 @@ export default function AdminAppointmentsPage() {
   }, [selectedDate, fetchDailyView]);
 
   async function handleCancel(appointmentId: string) {
-    await fetch(`/api/appointments/${appointmentId}`, {
+    const res = await fetch(`/api/appointments/${appointmentId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "CANCELLED" }),
     });
-    fetchDailyView(selectedDate);
+    if (!res.ok) {
+      alert("No se pudo cancelar la cita. Inténtalo de nuevo.");
+      return;
+    }
+    await fetchDailyView(selectedDate);
   }
 
   const dateLabel = selectedDate.toLocaleDateString("es-ES", {
