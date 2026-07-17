@@ -18,15 +18,15 @@ describe("site-settings-service", () => {
 
   it("creates the singleton row on first update", async () => {
     const updated = await updateSiteSettings(
-      { businessName: "Peluquería Ana", menuColor: "#222222" },
+      { businessName: "Peluquería Pelos", menuColor: "#222222" },
       testDb
     );
 
-    expect(updated.businessName).toBe("Peluquería Ana");
+    expect(updated.businessName).toBe("Peluquería Pelos");
     expect(updated.menuColor).toBe("#222222");
 
     const fetched = await getSiteSettings(testDb);
-    expect(fetched.businessName).toBe("Peluquería Ana");
+    expect(fetched.businessName).toBe("Peluquería Pelos");
   });
 
   it("stores and returns uploaded image bytes and mime type", async () => {
@@ -43,13 +43,13 @@ describe("site-settings-service", () => {
 
   it("updates only the fields provided, leaving others unchanged", async () => {
     await updateSiteSettings(
-      { businessName: "Peluquería Ana", tagline: "Cortes desde 1990" },
+      { businessName: "Peluquería Pelos", tagline: "Cortes desde 1990" },
       testDb
     );
 
     const updated = await updateSiteSettings({ tagline: "Nueva frase" }, testDb);
 
-    expect(updated.businessName).toBe("Peluquería Ana");
+    expect(updated.businessName).toBe("Peluquería Pelos");
     expect(updated.tagline).toBe("Nueva frase");
   });
 
