@@ -1,60 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import type { DailyViewWorker } from "@/lib/appointments-service";
+import { MonthCalendar } from "./MonthCalendar";
+import { DayGrid } from "./DayGrid";
 
-interface Appointment {
-  id: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  status: "CONFIRMED" | "CANCELLED";
-  clientId: string;
-  workerId: string;
-  serviceId: string;
+function toDateParam(date: Date): string {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
 }
 
 export default function AdminAppointmentsPage() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const now = new Date();
+    return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  });
+  const [workers, setWorkers] = useState<DailyViewWorker[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  function load() {
-    fetch("/api/appointments")
-      .then((res) => res.json())
-      .then(setAppointments);
-  }
-  useEffect(load, []);
+  const fetchDailyView = useCallback(async (date: Date) => {
+    setLoading(true);
+    const res = await fetch(`/api/admin/daily-view?date=${toDateParam(date)}`);
+    if (res.ok) {
+      setWorkers(await res.json());
+    }
+    setLoading(false);
+  }, []);
 
-  async function cancel(id: string) {
-    await fetch(`/api/appointments/${id}`, {
+  useEffect(() => {
+    fetchDailyView(selectedDate);
+  }, [selectedDate, fetchDailyView]);
+
+  async function handleCancel(appointmentId: string) {
+    await fetch(`/api/appointments/${appointmentId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "CANCELLED" }),
     });
-    load();
+    fetchDailyView(selectedDate);
   }
 
+  const dateLabel = selectedDate.toLocaleDateString("es-ES", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Todas las citas</h1>
-      <div className="flex flex-col gap-3">
-        {appointments.map((a) => (
-          <div
-            key={a.id}
-            className="flex items-center justify-between rounded-md border border-slate-200 p-3 text-sm"
-          >
-            <span>
-              {a.date.slice(0, 10)} {a.startTime}-{a.endTime} — {a.status}
-            </span>
-            {a.status === "CONFIRMED" && (
-              <button
-                onClick={() => cancel(a.id)}
-                className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-              >
-                Cancelar
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+    <main className="flex min-h-screen gap-6 px-6 py-8">
+      {/* Columna izquierda: calendario */}
+      <aside className="shrink-0">
+        <MonthCalendar
+          selectedDate={selectedDate}
+          onDateSelect={setSelectedDate}
+        />
+      </aside>
+
+      {/* Columna derecha: cuadrícula */}
+      <section className="min-w-0 flex-1">
+        <h1 className="mb-4 text-xl font-semibold capitalize text-slate-900">{dateLabel}</h1>
+        {loading ? (
+          <p className="text-sm text-slate-400">Cargando…</p>
+        ) : (
+          <DayGrid workers={workers} onCancel={handleCancel} />
+        )}
+      </section>
     </main>
   );
 }
