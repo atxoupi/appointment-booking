@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { testDb, resetDatabase } from "./setup";
-import { createAppointment, cancelAppointment } from "@/lib/appointments-service";
+import { createAppointment, cancelAppointment, getDailyView } from "@/lib/appointments-service";
 
 async function seedBasicFixture() {
   const worker = await testDb.user.create({
@@ -232,5 +232,101 @@ describe("cancelAppointment", () => {
       testDb
     );
     expect(rebooked.ok).toBe(true);
+  });
+});
+
+describe("getDailyView", () => {
+  beforeEach(resetDatabase);
+
+  it("returns all workers even with no appointments on that date", async () => {
+    await testDb.user.create({
+      data: { email: "w1@example.com", role: "WORKER", name: "Ana", lastName: "Ruiz" },
+    });
+    const date = new Date("2026-07-17T00:00:00.000Z");
+
+    const result = await getDailyView(date, testDb);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("Ana Ruiz");
+    expect(result[0].appointments).toHaveLength(0);
+  });
+
+  it("returns confirmed appointments with client and service names", async () => {
+    const worker = await testDb.user.create({
+      data: { email: "w1@example.com", role: "WORKER", name: "Ana", lastName: "Ruiz" },
+    });
+    const client = await testDb.user.create({
+      data: { email: "c1@example.com", role: "CLIENT", name: "Pedro", lastName: "García" },
+    });
+    const service = await testDb.service.create({
+      data: { name: "Corte de pelo", durationMinutes: 60 },
+    });
+    const date = new Date("2026-07-17T00:00:00.000Z");
+    await testDb.appointment.create({
+      data: {
+        workerId: worker.id,
+        clientId: client.id,
+        serviceId: service.id,
+        date,
+        startTime: "10:00",
+        endTime: "11:00",
+        status: "CONFIRMED",
+        createdBy: "CLIENT",
+      },
+    });
+
+    const result = await getDailyView(date, testDb);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].appointments).toHaveLength(1);
+    expect(result[0].appointments[0]).toMatchObject({
+      startTime: "10:00",
+      endTime: "11:00",
+      clientName: "Pedro García",
+      serviceName: "Corte de pelo",
+    });
+  });
+
+  it("excludes cancelled appointments", async () => {
+    const worker = await testDb.user.create({
+      data: { email: "w1@example.com", role: "WORKER", name: "Ana", lastName: "Ruiz" },
+    });
+    const client = await testDb.user.create({
+      data: { email: "c1@example.com", role: "CLIENT", name: "Pedro", lastName: "García" },
+    });
+    const service = await testDb.service.create({
+      data: { name: "Corte de pelo", durationMinutes: 30 },
+    });
+    const date = new Date("2026-07-17T00:00:00.000Z");
+    await testDb.appointment.create({
+      data: {
+        workerId: worker.id,
+        clientId: client.id,
+        serviceId: service.id,
+        date,
+        startTime: "10:00",
+        endTime: "10:30",
+        status: "CANCELLED",
+        createdBy: "CLIENT",
+      },
+    });
+
+    const result = await getDailyView(date, testDb);
+
+    expect(result[0].appointments).toHaveLength(0);
+  });
+
+  it("returns workers sorted alphabetically by name", async () => {
+    await testDb.user.create({
+      data: { email: "z@example.com", role: "WORKER", name: "Zoe", lastName: "López" },
+    });
+    await testDb.user.create({
+      data: { email: "a@example.com", role: "WORKER", name: "Ana", lastName: "Ruiz" },
+    });
+    const date = new Date("2026-07-17T00:00:00.000Z");
+
+    const result = await getDailyView(date, testDb);
+
+    expect(result.map((w) => w.name)).toEqual(["Ana Ruiz", "Zoe López"]);
   });
 });

@@ -93,3 +93,51 @@ export async function cancelAppointment(
   });
   return { ok: true };
 }
+
+export interface DailyViewAppointment {
+  id: string;
+  startTime: string;
+  endTime: string;
+  clientName: string;
+  serviceName: string;
+}
+
+export interface DailyViewWorker {
+  id: string;
+  name: string;
+  appointments: DailyViewAppointment[];
+}
+
+export async function getDailyView(
+  date: Date,
+  db: PrismaClient = defaultPrisma
+): Promise<DailyViewWorker[]> {
+  const workers = await db.user.findMany({
+    where: { role: "WORKER" },
+    orderBy: [{ name: "asc" }, { lastName: "asc" }],
+  });
+
+  const results: DailyViewWorker[] = [];
+
+  for (const worker of workers) {
+    const appointments = await db.appointment.findMany({
+      where: { workerId: worker.id, date, status: "CONFIRMED" },
+      include: { client: true, service: true },
+      orderBy: { startTime: "asc" },
+    });
+
+    results.push({
+      id: worker.id,
+      name: `${worker.name} ${worker.lastName}`,
+      appointments: appointments.map((a) => ({
+        id: a.id,
+        startTime: a.startTime,
+        endTime: a.endTime,
+        clientName: `${a.client.name} ${a.client.lastName}`,
+        serviceName: a.service.name,
+      })),
+    });
+  }
+
+  return results;
+}
