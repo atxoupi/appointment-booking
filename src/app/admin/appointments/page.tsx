@@ -19,11 +19,14 @@ export default function AdminAppointmentsPage() {
 
   const fetchDailyView = useCallback(async (date: Date) => {
     setLoading(true);
-    const res = await fetch(`/api/admin/daily-view?date=${toDateParam(date)}`);
-    if (res.ok) {
-      setWorkers(await res.json());
+    try {
+      const res = await fetch(`/api/admin/daily-view?date=${toDateParam(date)}`);
+      if (res.ok) {
+        setWorkers(await res.json());
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
