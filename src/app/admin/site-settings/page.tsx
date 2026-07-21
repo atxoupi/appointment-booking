@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface SiteSettingsResponse {
   businessName: string;
@@ -16,6 +17,7 @@ interface SiteSettingsResponse {
 }
 
 export default function AdminSiteSettingsPage() {
+  const router = useRouter();
   const [settings, setSettings] = useState<SiteSettingsResponse | null>(null);
   const [businessName, setBusinessName] = useState("");
   const [tagline, setTagline] = useState("");
@@ -71,6 +73,7 @@ export default function AdminSiteSettingsPage() {
     setLogoFile(null);
     setHeroFile(null);
     load();
+    router.refresh();
   }
 
   if (!settings) return null;

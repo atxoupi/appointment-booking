@@ -6,6 +6,11 @@ export default withAuth(
     const role = req.nextauth.token?.role;
     const path = req.nextUrl.pathname;
 
+    if (path === "/login" && role) {
+      if (role === "ADMIN") return NextResponse.redirect(new URL("/admin/appointments", req.url));
+      if (role === "WORKER") return NextResponse.redirect(new URL("/worker", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
+    }
     if (path.startsWith("/admin") && role !== "ADMIN") {
       return NextResponse.redirect(new URL("/login", req.url));
     }
@@ -18,11 +23,11 @@ export default withAuth(
     return NextResponse.next();
   },
   {
-    callbacks: { authorized: ({ token }) => !!token },
+    callbacks: { authorized: ({ token, req }) => req.nextUrl.pathname === "/login" || !!token },
     pages: { signIn: "/login" },
   }
 );
 
 export const config = {
-  matcher: ["/admin/:path*", "/worker/:path*", "/book/:path*", "/my-appointments/:path*"],
+  matcher: ["/login", "/admin/:path*", "/worker/:path*", "/book/:path*", "/my-appointments/:path*"],
 };
