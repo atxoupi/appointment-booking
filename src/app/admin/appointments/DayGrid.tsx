@@ -74,7 +74,7 @@ export function DayGrid({ workers, onCancel }: DayGridProps) {
         <tbody>
           {SLOTS.map((slot, slotIdx) => (
             <tr key={slot}>
-              <td className="border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-400">
+              <td className="border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-400 h-16">
                 {slot}
               </td>
               {grid.map((workerCells, workerIdx) => {
@@ -84,8 +84,7 @@ export function DayGrid({ workers, onCancel }: DayGridProps) {
                   return (
                     <td
                       key={workers[workerIdx].id}
-                      className="border border-slate-100 px-2"
-                      style={{ height: "2rem" }}
+                      className="border border-slate-100 px-2 h-16"
                     />
                   );
                 }
@@ -96,15 +95,12 @@ export function DayGrid({ workers, onCancel }: DayGridProps) {
                     rowSpan={cell.rowSpan}
                     className="border border-slate-200 bg-blue-50 px-2 py-1 align-top"
                   >
-                    <div className="flex flex-col gap-0.5">
+                    <div className="flex flex-col leading-tight">
                       <span className="font-medium text-slate-900">{cell.appointment.clientName}</span>
                       <span className="text-xs text-slate-600">{cell.appointment.serviceName}</span>
-                      <span className="text-xs text-slate-400">
-                        {cell.appointment.startTime}–{cell.appointment.endTime}
-                      </span>
                       <button
                         onClick={() => onCancel(cell.appointment.id)}
-                        className="mt-1 self-start rounded border border-red-200 px-2 py-0.5 text-xs text-red-600 hover:bg-red-50"
+                        className="mt-auto self-start rounded border border-red-200 px-2 py-0.5 text-xs text-red-600 hover:bg-red-50"
                       >
                         Cancelar
                       </button>
