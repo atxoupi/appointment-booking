@@ -12,6 +12,10 @@ function toResponseShape(settings: SiteSettingsData) {
     tagline: settings.tagline,
     backgroundColor: settings.backgroundColor,
     menuColor: settings.menuColor,
+    menuTextColor: settings.menuTextColor,
+    textColor: settings.textColor,
+    ctaBackgroundColor: settings.ctaBackgroundColor,
+    ctaTextColor: settings.ctaTextColor,
     hasLogo: settings.logoImage !== null,
     hasHeroPhoto: settings.heroImage !== null,
   };
@@ -62,12 +66,20 @@ export async function PATCH(request: Request) {
   const tagline = formData.get("tagline");
   const backgroundColor = formData.get("backgroundColor");
   const menuColor = formData.get("menuColor");
+  const menuTextColor = formData.get("menuTextColor");
+  const textColor = formData.get("textColor");
+  const ctaBackgroundColor = formData.get("ctaBackgroundColor");
+  const ctaTextColor = formData.get("ctaTextColor");
 
   const updated = await updateSiteSettings({
     ...(typeof businessName === "string" ? { businessName } : {}),
     ...(typeof tagline === "string" ? { tagline } : {}),
     ...(typeof backgroundColor === "string" ? { backgroundColor } : {}),
     ...(typeof menuColor === "string" ? { menuColor } : {}),
+    ...(typeof menuTextColor === "string" ? { menuTextColor } : {}),
+    ...(typeof textColor === "string" ? { textColor } : {}),
+    ...(typeof ctaBackgroundColor === "string" ? { ctaBackgroundColor } : {}),
+    ...(typeof ctaTextColor === "string" ? { ctaTextColor } : {}),
     ...(logo ? { logoImage: logo.buffer, logoMimeType: logo.mimeType } : {}),
     ...(heroPhoto ? { heroImage: heroPhoto.buffer, heroMimeType: heroPhoto.mimeType } : {}),
   });

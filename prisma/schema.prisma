@@ -101,14 +101,18 @@ model Appointment {
 }
 
 model SiteSettings {
-  id              String   @id
-  businessName    String   @default("Mi Negocio")
-  tagline         String   @default("")
-  backgroundColor String   @default("#ffffff")
-  menuColor       String   @default("#171717")
-  logoImage       Bytes?
-  logoMimeType    String?
-  heroImage       Bytes?
-  heroMimeType    String?
-  updatedAt       DateTime @updatedAt
+  id                 String   @id
+  businessName       String   @default("Mi Negocio")
+  tagline            String   @default("")
+  backgroundColor    String   @default("#ffffff")
+  menuColor          String   @default("#171717")
+  menuTextColor      String   @default("#ffffff")
+  textColor          String   @default("#0f172a")
+  ctaBackgroundColor String   @default("#0f172a")
+  ctaTextColor       String   @default("#ffffff")
+  logoImage          Bytes?
+  logoMimeType       String?
+  heroImage          Bytes?
+  heroMimeType       String?
+  updatedAt          DateTime @updatedAt
 }

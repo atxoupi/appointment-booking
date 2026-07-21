@@ -8,6 +8,7 @@ import { getNavLinksForRole } from "@/lib/nav-links";
 export interface NavSettings {
   businessName: string;
   menuColor: string;
+  menuTextColor: string;
   hasLogo: boolean;
 }
 
@@ -16,10 +17,10 @@ export function Nav({ role, settings }: { role: Role | undefined; settings: NavS
 
   return (
     <nav
-      style={{ backgroundColor: settings.menuColor }}
-      className="flex items-center justify-between px-6 py-3 text-white"
+      style={{ backgroundColor: settings.menuColor, color: settings.menuTextColor }}
+      className="flex items-center justify-between px-6 py-3"
     >
-      <Link href="/" className="flex items-center gap-2 text-sm font-semibold">
+      <Link href="/" className="flex items-center gap-2 text-sm font-semibold" style={{ color: settings.menuTextColor }}>
         {settings.hasLogo && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -32,12 +33,16 @@ export function Nav({ role, settings }: { role: Role | undefined; settings: NavS
       </Link>
       <div className="flex items-center gap-4 text-sm">
         {links.map((link) => (
-          <Link key={link.href} href={link.href} className="hover:underline">
+          <Link key={link.href} href={link.href} className="hover:underline" style={{ color: settings.menuTextColor }}>
             {link.label}
           </Link>
         ))}
         {role && (
-          <button onClick={() => signOut({ callbackUrl: "/" })} className="hover:underline">
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="hover:underline"
+            style={{ color: settings.menuTextColor }}
+          >
             Cerrar sesión
           </button>
         )}

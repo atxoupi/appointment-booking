@@ -12,6 +12,10 @@ describe("site-settings-service", () => {
     expect(settings.businessName).toBe("Mi Negocio");
     expect(settings.backgroundColor).toBe("#ffffff");
     expect(settings.menuColor).toBe("#171717");
+    expect(settings.menuTextColor).toBe("#ffffff");
+    expect(settings.textColor).toBe("#0f172a");
+    expect(settings.ctaBackgroundColor).toBe("#0f172a");
+    expect(settings.ctaTextColor).toBe("#ffffff");
     expect(settings.logoImage).toBeNull();
     expect(settings.heroImage).toBeNull();
   });
@@ -62,5 +66,23 @@ describe("site-settings-service", () => {
     expect(updated.businessName).toBe("Nuevo Nombre");
     expect(updated.logoImage).toEqual(fakeImage);
     expect(updated.logoMimeType).toBe("image/png");
+  });
+
+  it("persists text color fields and returns them on subsequent reads", async () => {
+    await updateSiteSettings(
+      {
+        menuTextColor: "#000000",
+        textColor: "#334155",
+        ctaBackgroundColor: "#2563eb",
+        ctaTextColor: "#f1f5f9",
+      },
+      testDb
+    );
+
+    const fetched = await getSiteSettings(testDb);
+    expect(fetched.menuTextColor).toBe("#000000");
+    expect(fetched.textColor).toBe("#334155");
+    expect(fetched.ctaBackgroundColor).toBe("#2563eb");
+    expect(fetched.ctaTextColor).toBe("#f1f5f9");
   });
 });

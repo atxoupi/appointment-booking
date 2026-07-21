@@ -18,11 +18,16 @@ export default async function Home() {
       style={settings.heroImage ? { backgroundImage: "url(/api/site-settings/hero-photo)" } : undefined}
     >
       <div className="rounded-lg bg-white/85 px-8 py-10 backdrop-blur-sm">
-        <h1 className="text-3xl font-semibold text-slate-900">{settings.businessName}</h1>
-        {settings.tagline && <p className="mt-2 text-lg text-slate-700">{settings.tagline}</p>}
+        <h1 className="text-3xl font-semibold" style={{ color: settings.textColor }}>{settings.businessName}</h1>
+        {settings.tagline && (
+          <p className="mt-2 text-lg" style={{ color: settings.textColor }}>
+            {settings.tagline}
+          </p>
+        )}
         <Link
           href={cta.href}
-          className="mt-6 inline-block rounded-md bg-slate-900 px-6 py-3 text-sm font-medium text-white hover:bg-slate-700"
+          className="mt-6 inline-block rounded-md px-6 py-3 text-sm font-medium hover:opacity-90"
+          style={{ backgroundColor: settings.ctaBackgroundColor, color: settings.ctaTextColor }}
         >
           {cta.label}
         </Link>

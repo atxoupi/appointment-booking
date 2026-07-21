@@ -7,6 +7,10 @@ interface SiteSettingsResponse {
   tagline: string;
   backgroundColor: string;
   menuColor: string;
+  menuTextColor: string;
+  textColor: string;
+  ctaBackgroundColor: string;
+  ctaTextColor: string;
   hasLogo: boolean;
   hasHeroPhoto: boolean;
 }
@@ -17,6 +21,10 @@ export default function AdminSiteSettingsPage() {
   const [tagline, setTagline] = useState("");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [menuColor, setMenuColor] = useState("#171717");
+  const [menuTextColor, setMenuTextColor] = useState("#ffffff");
+  const [textColor, setTextColor] = useState("#0f172a");
+  const [ctaBackgroundColor, setCtaBackgroundColor] = useState("#0f172a");
+  const [ctaTextColor, setCtaTextColor] = useState("#ffffff");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [heroFile, setHeroFile] = useState<File | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -30,6 +38,10 @@ export default function AdminSiteSettingsPage() {
         setTagline(data.tagline);
         setBackgroundColor(data.backgroundColor);
         setMenuColor(data.menuColor);
+        setMenuTextColor(data.menuTextColor);
+        setTextColor(data.textColor);
+        setCtaBackgroundColor(data.ctaBackgroundColor);
+        setCtaTextColor(data.ctaTextColor);
       });
   }
   useEffect(load, []);
@@ -42,6 +54,10 @@ export default function AdminSiteSettingsPage() {
     formData.set("tagline", tagline);
     formData.set("backgroundColor", backgroundColor);
     formData.set("menuColor", menuColor);
+    formData.set("menuTextColor", menuTextColor);
+    formData.set("textColor", textColor);
+    formData.set("ctaBackgroundColor", ctaBackgroundColor);
+    formData.set("ctaTextColor", ctaTextColor);
     if (logoFile) formData.set("logo", logoFile);
     if (heroFile) formData.set("heroPhoto", heroFile);
 
@@ -92,6 +108,41 @@ export default function AdminSiteSettingsPage() {
           Color del menú
           <input type="color" value={menuColor} onChange={(e) => setMenuColor(e.target.value)} />
         </label>
+        <fieldset className="flex flex-col gap-3 rounded-md border border-slate-200 p-4">
+          <legend className="px-1 text-sm font-semibold text-slate-700">Colores de texto</legend>
+          <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
+            Texto del menú
+            <input
+              type="color"
+              value={menuTextColor}
+              onChange={(e) => setMenuTextColor(e.target.value)}
+            />
+          </label>
+          <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
+            Texto de portada
+            <input
+              type="color"
+              value={textColor}
+              onChange={(e) => setTextColor(e.target.value)}
+            />
+          </label>
+          <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
+            Fondo del botón principal
+            <input
+              type="color"
+              value={ctaBackgroundColor}
+              onChange={(e) => setCtaBackgroundColor(e.target.value)}
+            />
+          </label>
+          <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
+            Texto del botón principal
+            <input
+              type="color"
+              value={ctaTextColor}
+              onChange={(e) => setCtaTextColor(e.target.value)}
+            />
+          </label>
+        </fieldset>
         <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
           Logo
           {settings.hasLogo && (

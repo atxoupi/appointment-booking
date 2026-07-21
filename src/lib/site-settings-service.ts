@@ -8,6 +8,10 @@ export interface SiteSettingsData {
   tagline: string;
   backgroundColor: string;
   menuColor: string;
+  menuTextColor: string;
+  textColor: string;
+  ctaBackgroundColor: string;
+  ctaTextColor: string;
   logoImage: Buffer | null;
   logoMimeType: string | null;
   heroImage: Buffer | null;
@@ -19,6 +23,10 @@ const DEFAULTS: SiteSettingsData = {
   tagline: "",
   backgroundColor: "#ffffff",
   menuColor: "#171717",
+  menuTextColor: "#ffffff",
+  textColor: "#0f172a",
+  ctaBackgroundColor: "#0f172a",
+  ctaTextColor: "#ffffff",
   logoImage: null,
   logoMimeType: null,
   heroImage: null,

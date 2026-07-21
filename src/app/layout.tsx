@@ -43,6 +43,7 @@ export default async function RootLayout({
             settings={{
               businessName: settings.businessName,
               menuColor: settings.menuColor,
+              menuTextColor: settings.menuTextColor,
               hasLogo: settings.logoImage !== null,
             }}
           />
